@@ -47,6 +47,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
     
 
+class Student(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=255)
+    profile_image = models.URLField(blank=True, null=True)
+
+    def __str__(self):
+        return self.full_name
+
 class Educator(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=255)
@@ -57,11 +65,38 @@ class Educator(models.Model):
     def __str__(self):
         return self.full_name
 
-
-class Student(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=255)
-    profile_image = models.URLField(blank=True, null=True)
+class CourseTag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
-        return self.full_name
+        return self.name
+
+class Course(models.Model):
+    CATEGORY_CHOICES = [
+        ('programming', 'Programming'),
+        ('design', 'Design'),
+        ('business', 'Business'),
+        ('language', 'Language'),
+        
+    ]
+
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    created_by = models.ForeignKey('Educator', on_delete=models.CASCADE, related_name='courses')
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    tags = models.ManyToManyField(CourseTag, related_name='courses')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+class Lesson(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.course.title})"
+
+
