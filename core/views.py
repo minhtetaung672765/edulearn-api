@@ -163,3 +163,59 @@ def my_course_lessons(request, course_id):
 
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+# --------------------- AI: Personalized Course Recommendation -------------------------------
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def recommended_courses(request):
+    if not hasattr(request.user, 'student'):
+        return Response({'detail': 'Only students can access recommendations.'}, status=status.HTTP_403_FORBIDDEN)
+
+    # Get student's subscribed courses
+    subscriptions = SubscribedCourse.objects.filter(student=request.user.student)
+    subscribed_courses = [sub.course for sub in subscriptions]
+
+    if not subscribed_courses:
+        return Response({'detail': 'No subscriptions found. Subscribe to courses first!'}, status=status.HTTP_404_NOT_FOUND)
+
+    subscribed_course_ids = [course.id for course in subscribed_courses]
+    recommended_courses_set = set()
+
+    for course in subscribed_courses:
+        # Find other courses with the same category
+        similar_courses = Course.objects.filter(category=course.category).exclude(id__in=subscribed_course_ids)
+
+        # Filter by tag similarity
+        course_tags = set(tag.name for tag in course.tags.all())
+        course_scores = []
+
+        for candidate in similar_courses:
+            candidate_tags = set(tag.name for tag in candidate.tags.all())
+            common_tags = course_tags.intersection(candidate_tags)
+            score = len(common_tags)
+            course_scores.append((candidate, score))
+
+        # Sort by number of common tags (higher = better)
+        course_scores.sort(key=lambda x: x[1], reverse=True)
+
+        # Take top 3-4 best matches (you can tweak number)
+        top_matches = [course_score[0] for course_score in course_scores[:4]]
+
+        recommended_courses_set.update(top_matches)
+
+    recommended_courses_list = list(recommended_courses_set)
+
+    # If not enough, add same-category random courses
+    if len(recommended_courses_list) < 5:
+        additional_courses = Course.objects.exclude(id__in=subscribed_course_ids + [c.id for c in recommended_courses_list]).order_by('?')[:(5 - len(recommended_courses_list))]
+        recommended_courses_list += list(additional_courses)
+
+    # Limit to 5 or more if you want
+    recommended_courses_list = recommended_courses_list[:5]
+
+    from .serializers import CourseSerializer
+    serializer = CourseSerializer(recommended_courses_list, many=True)
+
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+# ----------------------------------------------------------------------------

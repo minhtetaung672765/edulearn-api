@@ -9,7 +9,8 @@ from .views import (
     SubscribedCourseViewSet, 
     my_courses, 
     subscribe_course, 
-    my_course_lessons
+    my_course_lessons,
+    recommended_courses
     )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -30,5 +31,7 @@ urlpatterns += [
     path('my-courses/', my_courses, name='my-courses'),
     path('subscribe/<int:course_id>/', subscribe_course, name='subscribe-course'),
     path('my-courses/<int:course_id>/lessons/', my_course_lessons, name='my-course-lessons'),
+    # 
+    path('recommended-courses/', recommended_courses, name='recommended-courses'),
 ]
 
