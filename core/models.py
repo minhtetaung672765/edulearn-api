@@ -82,7 +82,9 @@ class Course(models.Model):
 
     title = models.CharField(max_length=255)
     description = models.TextField()
-    created_by = models.ForeignKey('Educator', on_delete=models.CASCADE, related_name='courses')
+    # created_by = models.ForeignKey('Educator', on_delete=models.CASCADE, related_name='courses')
+    # allow null for created_by
+    created_by = models.ForeignKey('Educator', on_delete=models.SET_NULL, null=True, blank=True, related_name='courses')
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     tags = models.ManyToManyField(CourseTag, related_name='courses')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -94,9 +96,26 @@ class Lesson(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
     title = models.CharField(max_length=255)
     content = models.TextField()
+    lesson_number = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.title} ({self.course.title})"
+    class Meta:
+        ordering = ['lesson_number']  # Optional: always fetch lessons in order
 
+    # def __str__(self):
+    #     return f"{self.title} ({self.course.title})"
+    def __str__(self):
+        return f"Lesson {self.lesson_number}: {self.title} ({self.course.title})"
+
+
+class SubscribedCourse(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='subscriptions')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='subscribers')
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'course')  # Prevent duplicate subscriptions
+
+    def __str__(self):
+        return f"{self.student.full_name} subscribed to {self.course.title}"
 

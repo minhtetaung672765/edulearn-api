@@ -119,6 +119,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# ----+ mac added
+REST_FRAMEWORK = {
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.SessionAuthentication',
+    # ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+# ---+
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
