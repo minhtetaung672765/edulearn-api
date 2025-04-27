@@ -88,6 +88,7 @@ class Course(models.Model):
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     tags = models.ManyToManyField(CourseTag, related_name='courses')
     created_at = models.DateTimeField(auto_now_add=True)
+    course_image = models.URLField(null=True, blank=True)  # New field for image URL
 
     def __str__(self):
         return self.title
