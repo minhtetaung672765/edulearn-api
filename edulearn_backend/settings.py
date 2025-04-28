@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,6 +80,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'edulearn_backend.wsgi.application'
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),       #  1 hour access
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=3),        #  3 days refresh
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -132,6 +139,7 @@ REST_FRAMEWORK = {
     ),
 }
 # ---+
+
 
 
 # Internationalization

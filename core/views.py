@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 from rest_framework import viewsets, permissions
-from .models import Course, Lesson, CourseTag, SubscribedCourse
+from .models import Course, Lesson, CourseTag, SubscribedCourse, Student
 from .serializers import CourseSerializer, LessonSerializer, CourseTagSerializer, SubscribedCourseSerializer
 from .permissions import IsEducatorOrReadOnly
 
@@ -162,6 +162,28 @@ def my_course_lessons(request, course_id):
     serializer = LessonSerializer(lessons, many=True)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    user = request.user
+    full_name = ''
+
+    try:
+        if user.role == 'student':
+            student = Student.objects.get(user=user)
+            full_name = student.full_name
+        elif user.role == 'educator':
+            full_name = "Educator"  # Later you can adjust if educator has profile info
+    except Student.DoesNotExist:
+        full_name = user.email  # fallback if not found
+
+    return Response({
+        'id': user.id,
+        'email': user.email,
+        'name': full_name,
+        'role': user.role,
+    })
 
 # --------------------- AI: Personalized Course Recommendation -------------------------------
 

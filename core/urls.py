@@ -10,7 +10,8 @@ from .views import (
     my_courses, 
     subscribe_course, 
     my_course_lessons,
-    recommended_courses
+    recommended_courses,
+    user_profile
     )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -27,6 +28,7 @@ urlpatterns = [
 urlpatterns += [
     path('auth/register/', RegisterView.as_view(), name='register'),
     path('auth/login/', TokenObtainPairView.as_view(), name='login'),
+    path('auth/profile/', user_profile, name='user-profile'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('my-courses/', my_courses, name='my-courses'),
     path('subscribe/<int:course_id>/', subscribe_course, name='subscribe-course'),
