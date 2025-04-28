@@ -72,20 +72,21 @@ class CourseTag(models.Model):
         return self.name
 
 class Course(models.Model):
-    CATEGORY_CHOICES = [
-        ('programming', 'Programming'),
-        ('design', 'Design'),
-        ('business', 'Business'),
-        ('language', 'Language'),
+    # CATEGORY_CHOICES = [
+    #     ('programming', 'Programming'),
+    #     ('design', 'Design'),
+    #     ('business', 'Business'),
+    #     ('language', 'Language'),
         
-    ]
+    # ]
 
     title = models.CharField(max_length=255)
     description = models.TextField()
     # created_by = models.ForeignKey('Educator', on_delete=models.CASCADE, related_name='courses')
     # allow null for created_by
     created_by = models.ForeignKey('Educator', on_delete=models.SET_NULL, null=True, blank=True, related_name='courses')
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    # category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    category = models.CharField(max_length=100)
     tags = models.ManyToManyField(CourseTag, related_name='courses')
     created_at = models.DateTimeField(auto_now_add=True)
     course_image = models.URLField(null=True, blank=True)  # New field for image URL
