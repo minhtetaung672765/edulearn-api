@@ -11,7 +11,8 @@ from .views import (
     subscribe_course, 
     my_course_lessons,
     recommended_courses,
-    user_profile
+    user_profile,
+    generate_questions
     )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -35,5 +36,6 @@ urlpatterns += [
     path('my-courses/<int:course_id>/lessons/', my_course_lessons, name='my-course-lessons'),
     # 
     path('recommended-courses/', recommended_courses, name='recommended-courses'),
+    path("generate-questions/", generate_questions, name="generate-questions"),
 ]
 

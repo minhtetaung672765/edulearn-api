@@ -25,6 +25,10 @@ AUTH_USER_MODEL = 'core.User'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 
+# GEMINI API KEY
+GEMINI_API_KEY = config("GEMINI_API_KEY")
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

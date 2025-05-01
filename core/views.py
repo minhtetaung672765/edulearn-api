@@ -17,6 +17,11 @@ from rest_framework import serializers
 
 from rest_framework.decorators import api_view, permission_classes
 
+from decouple import config
+import google.generativeai as genai
+import json
+import re
+
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
@@ -239,5 +244,57 @@ def recommended_courses(request):
     serializer = CourseSerializer(recommended_courses_list, many=True)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+# ----------------------------------------------------------------------------
+
+# --------------------- AI: Questions and MCQs Generation -------------------------------
+
+# Load API key from env
+genai.configure(api_key=config("GEMINI_API_KEY"))
+
+@api_view(["POST"])
+def generate_questions(request):
+    lesson_content = request.data.get("lesson_content")
+
+    if not lesson_content:
+        return Response({"error": "Lesson content is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+
+        prompt = (
+            "Generate 3 open-ended answer questions with answers (2-4 sentences) and 3 multiple choice questions with 4 options each and the correct option, "
+            "based on the following lesson content:\n\n"
+            f"{lesson_content}\n\n"
+            "Return the response in JSON format like:\n"
+            "{\n"
+            "  \"questions\": [\n"
+            "    { \"question\": \"Q1...\", \"answer\": \"...\" },\n"
+            "    ...\n"
+            "  ],\n"
+            "  \"mcqs\": [\n"
+            "    {\n"
+            "      \"question\": \"What is...\",\n"
+            "      \"options\": [\"A\", \"B\", \"C\", \"D\"],\n"
+            "      \"answer\": \"B\"\n"
+            "    },\n"
+            "    ...\n"
+            "  ]\n"
+            "}"
+        )
+
+        response = model.generate_content(prompt)
+        raw_text = response.text
+
+        # Extract JSON using regex if it's wrapped in code block
+        json_match = re.search(r"```json\s*(.*?)\s*```", raw_text, re.DOTALL)
+        json_data = json_match.group(1) if json_match else raw_text
+
+        parsed = json.loads(json_data)
+
+        return Response(parsed)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # ----------------------------------------------------------------------------
