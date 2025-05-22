@@ -22,10 +22,13 @@ import google.generativeai as genai
 import json
 import re
 
+from rest_framework.parsers import MultiPartParser, FormParser
+
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = [IsEducatorOrReadOnly]
+    parser_classes = (MultiPartParser, FormParser)
 
     # automatically set the created_by field to the current user's educator
     def perform_create(self, serializer):

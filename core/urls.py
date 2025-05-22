@@ -16,6 +16,9 @@ from .views import (
     )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 router = DefaultRouter()
 router.register(r'courses', CourseViewSet)
 router.register(r'lessons', LessonViewSet)
@@ -24,7 +27,7 @@ router.register(r'subscribed-courses', SubscribedCourseViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += [
     path('auth/register/', RegisterView.as_view(), name='register'),
